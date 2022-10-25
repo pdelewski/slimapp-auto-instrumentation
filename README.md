@@ -5,3 +5,4 @@ It handles get instead of post request
 
 ```
 After that, open `http://localhost:8090/getquote` in your browser.
+```
