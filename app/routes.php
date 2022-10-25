@@ -1,40 +1,42 @@
 <?php
-
 declare(strict_types=1);
 
-use App\Application\Actions\User\ListUsersAction;
-use App\Application\Actions\User\ViewUserAction;
+use OpenTelemetry\API\Trace\AbstractSpan;
+use OpenTelemetry\API\Trace\SpanKind;
+use OpenTelemetry\SDK\Trace\Tracer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
-use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 use Psr\Log\LoggerInterface;
 
-function helloWorld() {
-    var_dump('HELLO');
+function calculateQuote($jsonObject): float
+{
+    $quote = 0.0;
+    try {
+        $numberOfItems = 5; //intval($jsonObject['numberOfItems']);
+        $quote = 8.90 * $numberOfItems;
+
+    } catch (\Exception $exception) {
+    } finally {
+        return $quote;
+    }
 }
 
 return function (App $app) {
     $container = $app->getContainer();
-    $app->options('/{routes:.*}', function (Request $request, Response $response) use ($container) {
-        // CORS Pre-Flight OPTIONS Request Handler
+    $app->get('/getquote', function (Request $request, Response $response) use ($container) {
         $logger = $container->get(LoggerInterface::class);
-        $logger->info('options');    
-        return $response;
-    });
+        $logger->info('getquote');
 
-    $app->get('/', function (Request $request, Response $response) use ($container) {
-	$logger = $container->get(LoggerInterface::class);
-	$logger->info('get');
-        helloWorld();
-        $response->getBody()->write('Hello world Sumo!');
-        return $response;
-    });
+        $body = $request->getBody()->getContents();
+        $jsonObject = json_decode($body, true);
 
-    $app->group('/users', function (Group $group) use ($container) {
-        $logger = $container->get(LoggerInterface::class);
-        $logger->info('group');
-        $group->get('', ListUsersAction::class);
-        $group->get('/{id}', ViewUserAction::class);
+        $data = calculateQuote($jsonObject);
+
+        $payload = json_encode($data);
+        $response->getBody()->write($payload);
+
+        return $response
+            ->withHeader('Content-Type', 'application/json');
     });
 };

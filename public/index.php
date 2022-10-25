@@ -1,27 +1,38 @@
 <?php
-
 declare(strict_types=1);
 
-require __DIR__ . '/../vendor/autoload.php';
-use App\Application\Handlers\HttpErrorHandler;
-use App\Application\Handlers\ShutdownHandler;
-use App\Application\ResponseEmitter\ResponseEmitter;
-use App\Application\Settings\SettingsInterface;
+use DI\Bridge\Slim\Bridge;
 use DI\ContainerBuilder;
+use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
+use OpenTelemetry\API\Trace\SpanKind;
+use OpenTelemetry\API\Trace\StatusCode;
+use OpenTelemetry\SDK\Trace\Tracer;
+use OpenTelemetry\SDK\Trace\TracerProviderFactory;
+use OpenTelemetry\SDK\Common\Util\ShutdownHandler;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Factory\AppFactory;
 use Slim\Factory\ServerRequestCreatorFactory;
+use Slim\Routing\RouteContext;
 use Psr\Log\LoggerInterface;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
-use OpenTelemetry\SDK\Trace\SpanExporter\LoggerExporter;
-use OpenTelemetry\SDK\Trace\TracerProvider;
 use OpenTelemetry\Contrib\Jaeger\Exporter as JaegerExporter;
+use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
+use OpenTelemetry\SDK\Trace\TracerProvider;
 
-$logger = new Logger('trace');
-$logger->pushHandler(new StreamHandler(__DIR__.'/../logs/trace.log', Logger::DEBUG));
+require __DIR__ . '/../vendor/autoload.php';
 
-$exporter = JaegerExporter::fromConnectionString('http://localhost:9412/api/v2/spans', 'AutoInstrumentation');
+// Instantiate PHP-DI ContainerBuilder
+$containerBuilder = new ContainerBuilder();
+
+// Set up settings
+$settings = require __DIR__ . '/../app/settings.php';
+$settings($containerBuilder);
+
+// Set up dependencies
+$dependencies = require __DIR__ . '/../app/dependencies.php';
+$dependencies($containerBuilder);
+
+$exporter = JaegerExporter::fromConnectionString('http://localhost:9412/api/v2/spans', 'QuoteService AutoInstrumentation');
 $tracerProvider = new TracerProvider(
     new SimpleSpanProcessor($exporter)
 );
@@ -36,75 +47,54 @@ $scope = \OpenTelemetry\API\Common\Instrumentation\Configurator::create()
     ->withTracerProvider($tracerProvider)
     ->activate();
 
+// Add OTel
+//$tracerProvider = (new TracerProviderFactory('quoteservice'))->create();
+$exporter = JaegerExporter::fromConnectionString('http://localhost:9412/api/v2/spans', 'QuoteService automatically instrumented');
+$tracerProvider = new TracerProvider(
+    new SimpleSpanProcessor($exporter)
+);
 
-// Instantiate PHP-DI ContainerBuilder
-$containerBuilder = new ContainerBuilder();
-
-if (false) { // Should be set to true in production
-	$containerBuilder->enableCompilation(__DIR__ . '/../var/cache');
-}
-
-// Set up settings
-$settings = require __DIR__ . '/../app/settings.php';
-$settings($containerBuilder);
-
-// Set up dependencies
-$dependencies = require __DIR__ . '/../app/dependencies.php';
-$dependencies($containerBuilder);
-
-// Set up repositories
-$repositories = require __DIR__ . '/../app/repositories.php';
-$repositories($containerBuilder);
+//$containerBuilder->addDefinitions([
+//    Tracer::class => $tracer
+//]);
 
 // Build PHP-DI Container instance
 $container = $containerBuilder->build();
 
 // Instantiate the app
 AppFactory::setContainer($container);
-$app = AppFactory::create();
-$callableResolver = $app->getCallableResolver();
-
+$app = Bridge::create($container);
 // Register middleware
-$middleware = require __DIR__ . '/../app/middleware.php';
-$middleware($app);
+//middleware starts root span based on route pattern, sets status from http code
+$app->add(function (Request $request, RequestHandler $handler) use ($container) {
+    $logger = $container->get(LoggerInterface::class);
+    $logger->info('add');
+
+    try {
+        $response = $handler->handle($request);
+    } finally {
+    }
+
+    return $response;
+});
+$app->addRoutingMiddleware();
 
 // Register routes
 $routes = require __DIR__ . '/../app/routes.php';
 $routes($app);
 
-/** @var SettingsInterface $settings */
-$settings = $container->get(SettingsInterface::class);
-
-$displayErrorDetails = $settings->get('displayErrorDetails');
-$logError = $settings->get('logError');
-$logErrorDetails = $settings->get('logErrorDetails');
-
 // Create Request object from globals
 $serverRequestCreator = ServerRequestCreatorFactory::create();
 $request = $serverRequestCreator->createServerRequestFromGlobals();
-
-// Create Error Handler
-$responseFactory = $app->getResponseFactory();
-$errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
-
-// Create Shutdown Handler
-$shutdownHandler = new ShutdownHandler($request, $errorHandler, $displayErrorDetails);
-register_shutdown_function($shutdownHandler);
-
-// Add Routing Middleware
-$app->addRoutingMiddleware();
 
 // Add Body Parsing Middleware
 $app->addBodyParsingMiddleware();
 
 // Add Error Middleware
-$errorMiddleware = $app->addErrorMiddleware($displayErrorDetails, $logError, $logErrorDetails);
-$errorMiddleware->setDefaultErrorHandler($errorHandler);
+$errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
-// Run App & Emit Response
-$response = $app->handle($request);
-$responseEmitter = new ResponseEmitter();
-$responseEmitter->emit($response);
-
+// Run App
+$app->run();
 $scope->detach();
 $tracerProvider->shutdown();
+

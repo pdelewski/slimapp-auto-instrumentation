@@ -40,6 +40,7 @@
         "open-telemetry/opentelemetry-auto-slim": "@dev",
         "open-telemetry/sdk-contrib": "dev-main",
         "php-di/php-di": "^6.4",
+        "php-di/slim-bridge": "3.2.0",
         "php-http/curl-client": "2.x-dev",
         "php-http/discovery": "^1.14",
         "php-http/message": "^1.13",
