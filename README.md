@@ -35,6 +35,11 @@ add packages to `require` section
     "open-telemetry/opentelemetry-auto-psr15": "@dev",
 ```
 
+install dependencies by
+```
+    composer install
+```
+
 After that, open `http://localhost:8090/getquote` in your browser.
 
 ![Alt text](trace.png?raw=true "Trace")
