@@ -7,7 +7,11 @@ In order to run it you have to pull following changes:
 
 `https://github.com/open-telemetry/opentelemetry-php-contrib/pull/81/`
 
-and modify url of repository in `composer.json` to valid path on your system
+pull, compile and install extension:
+
+`https://github.com/open-telemetry/opentelemetry-php-instrumentation`
+
+modify url of repository in `composer.json` to valid path on your system
 
 ```
     "repositories": [
