@@ -29,6 +29,13 @@
             "options": {
                 "symlink": false
             }
+        },
+        {
+            "type": "path",
+            "url": "../../slim-auto-instrumentation/opentelemetry-php-contrib/src/Instrumentation/Psr15",
+            "options": {
+                "symlink": false
+            }        
         }
     ],
     "require": {
@@ -38,6 +45,7 @@
         "monolog/monolog": "^2.8",
         "open-telemetry/api": "dev-main",
         "open-telemetry/opentelemetry-auto-slim": "@dev",
+        "open-telemetry/opentelemetry-auto-psr15": "@dev",
         "open-telemetry/sdk-contrib": "dev-main",
         "php-di/php-di": "^6.4",
         "php-di/slim-bridge": "3.2.0",
