@@ -37,3 +37,5 @@ add packages to `require` section
 
 After that, open `http://localhost:8090/getquote` in your browser.
 
+![Alt text](trace.png?raw=true "Trace")
+
