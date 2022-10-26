@@ -42,5 +42,7 @@ install dependencies by
 
 After that, open `http://localhost:8090/getquote` in your browser.
 
+In jeager you should see generated trace
+
 ![Alt text](trace.png?raw=true "Trace")
 
