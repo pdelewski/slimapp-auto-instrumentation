@@ -17,10 +17,23 @@ and modify url of repository in `composer.json` to valid path on your system
             "options": {
                 "symlink": false
             }
+        },
+        {
+            "type": "path",
+            "url": "../../slim-auto-instrumentation/opentelemetry-php-contrib/src/Instrumentation/Psr15",
+            "options": {
+                "symlink": false
+            }
         }
     ],
 ```
 
+add packages to `require` section
+
+```
+    "open-telemetry/opentelemetry-auto-slim": "@dev",
+    "open-telemetry/opentelemetry-auto-psr15": "@dev",
+```
 
 After that, open `http://localhost:8090/getquote` in your browser.
 
