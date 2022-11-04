@@ -3,12 +3,6 @@ declare(strict_types=1);
 
 use DI\Bridge\Slim\Bridge;
 use DI\ContainerBuilder;
-use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
-use OpenTelemetry\API\Trace\SpanKind;
-use OpenTelemetry\API\Trace\StatusCode;
-use OpenTelemetry\SDK\Trace\Tracer;
-use OpenTelemetry\SDK\Trace\TracerProviderFactory;
-use OpenTelemetry\SDK\Common\Util\ShutdownHandler;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Factory\AppFactory;
