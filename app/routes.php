@@ -21,22 +21,21 @@ function calculateQuote($jsonObject): float
         return $quote;
     }
 }
-
-return function (App $app) {
-    $container = $app->getContainer();
-    $app->get('/getquote', function (Request $request, Response $response) use ($container) {
-        $logger = $container->get(LoggerInterface::class);
-        $logger->info('getquote');
-
+class Processor {
+    public static function processRequest(Request $request, Response $response) {
         $body = $request->getBody()->getContents();
         $jsonObject = json_decode($body, true);
 
-        $data = calculateQuote($jsonObject);
-
+        // $data = calculateQuote($jsonObject);
+	    $data = 44;
         $payload = json_encode($data);
         $response->getBody()->write($payload);
 
         return $response
             ->withHeader('Content-Type', 'application/json');
-    });
+    }
+}
+return function (App $app) {
+    $container = $app->getContainer();
+    $app->get('/getquote', ['Processor','processRequest']);
 };

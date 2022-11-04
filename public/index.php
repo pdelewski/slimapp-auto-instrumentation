@@ -37,26 +37,16 @@ $tracerProvider = new TracerProvider(
     new SimpleSpanProcessor($exporter)
 );
 
-// $tracerProvider =  new TracerProvider(
-//     new SimpleSpanProcessor(
-// 	new LoggerExporter("hooker", $logger)
-//     )
-// );
-
 $scope = \OpenTelemetry\API\Common\Instrumentation\Configurator::create()
-    ->withTracerProvider($tracerProvider)
-    ->activate();
+     ->withTracerProvider($tracerProvider)
+     ->activate();
 
-// Add OTel
-//$tracerProvider = (new TracerProviderFactory('quoteservice'))->create();
-$exporter = JaegerExporter::fromConnectionString('http://localhost:9412/api/v2/spans', 'QuoteService automatically instrumented');
-$tracerProvider = new TracerProvider(
-    new SimpleSpanProcessor($exporter)
-);
+function shutdown($scope, $tracerProvider) {
+    $scope->detach();
+    $tracerProvider->shutdown();
+}
 
-//$containerBuilder->addDefinitions([
-//    Tracer::class => $tracer
-//]);
+register_shutdown_function('shutdown', $scope, $tracerProvider);
 
 // Build PHP-DI Container instance
 $container = $containerBuilder->build();
@@ -64,11 +54,9 @@ $container = $containerBuilder->build();
 // Instantiate the app
 AppFactory::setContainer($container);
 $app = Bridge::create($container);
-// Register middleware
-//middleware starts root span based on route pattern, sets status from http code
-$app->add(function (Request $request, RequestHandler $handler) use ($container) {
-    $logger = $container->get(LoggerInterface::class);
-    $logger->info('add');
+
+class Processor1 {
+public static function processRequest(Request $request, RequestHandler $handler) {
 
     try {
         $response = $handler->handle($request);
@@ -76,7 +64,11 @@ $app->add(function (Request $request, RequestHandler $handler) use ($container) 
     }
 
     return $response;
-});
+}
+}
+// Register middleware
+//middleware starts root span based on route pattern, sets status from http code
+$app->add(['Processor1','processRequest']);
 $app->addRoutingMiddleware();
 
 // Register routes
@@ -95,6 +87,4 @@ $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
 // Run App
 $app->run();
-$scope->detach();
-$tracerProvider->shutdown();
 
