@@ -5,7 +5,7 @@ It handles get instead of post request.
 
 In order to run it you have to pull following changes:
 
-`https://github.com/open-telemetry/opentelemetry-php-contrib/pull/81/`
+git clone https://github.com/open-telemetry/opentelemetry-php-contrib.git
 
 pull, compile and install extension:
 
@@ -17,14 +17,14 @@ modify url of repository in `composer.json` to valid path on your system
     "repositories": [
         {
             "type": "path",
-            "url": "../../slim-auto-instrumentation/opentelemetry-php-contrib/src/Instrumentation/Slim",
+            "url": "../../opentelemetry-php-contrib/src/Instrumentation/Slim",
             "options": {
                 "symlink": false
             }
         },
         {
             "type": "path",
-            "url": "../../slim-auto-instrumentation/opentelemetry-php-contrib/src/Instrumentation/Psr15",
+            "url": "../../opentelemetry-php-contrib/src/Instrumentation/Psr15",
             "options": {
                 "symlink": false
             }
