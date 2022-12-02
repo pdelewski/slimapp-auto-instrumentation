@@ -25,14 +25,14 @@
     "repositories": [
         {
             "type": "path",
-            "url": "../../slim-auto-instrumentation/opentelemetry-php-contrib/src/Instrumentation/Slim",
+            "url": "../../opentelemetry-php-contrib/src/Instrumentation/Slim",
             "options": {
                 "symlink": false
             }
         },
         {
             "type": "path",
-            "url": "../../slim-auto-instrumentation/opentelemetry-php-contrib/src/Instrumentation/Psr15",
+            "url": "../../opentelemetry-php-contrib/src/Instrumentation/Psr15",
             "options": {
                 "symlink": false
             }        
@@ -43,10 +43,10 @@
         "ext-json": "*",
         "guzzlehttp/psr7": "2.4.x-dev",
         "monolog/monolog": "^2.8",
-        "open-telemetry/api": "dev-main",
+        "open-telemetry/api": "^0",
         "open-telemetry/opentelemetry-auto-slim": "@dev",
         "open-telemetry/opentelemetry-auto-psr15": "@dev",
-        "open-telemetry/sdk-contrib": "dev-main",
+        "open-telemetry/sdk-contrib": "^0",
         "php-di/php-di": "^6.4",
         "php-di/slim-bridge": "3.2.0",
         "php-http/curl-client": "2.x-dev",
@@ -63,7 +63,7 @@
         "phpstan/phpstan": "^1.8",
         "phpunit/phpunit": "^9.5.25",
         "squizlabs/php_codesniffer": "^3.7",
-        "open-telemetry/sdk": "dev-main"
+        "open-telemetry/sdk": "^0"
     },
     "config": {
         "allow-plugins": {
