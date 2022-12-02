@@ -22,22 +22,6 @@
             "homepage": "http://www.lgse.com/"
         }
     ],
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../../opentelemetry-php-contrib/src/Instrumentation/Slim",
-            "options": {
-                "symlink": false
-            }
-        },
-        {
-            "type": "path",
-            "url": "../../opentelemetry-php-contrib/src/Instrumentation/Psr15",
-            "options": {
-                "symlink": false
-            }        
-        }
-    ],
     "require": {
         "php": "^7.4 || ^8.0",
         "ext-json": "*",
